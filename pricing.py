@@ -1,19 +1,17 @@
-from datetime import timedelta
-
+from datetime import datetime, date, timedelta
 def calculate_amount(room,no_of_guests,check_in,check_out,breakfast,stays):
     nights=(check_out-check_in).days
     room_amount=0
     guest_amount=0
     breakfast_amount=0
     nights_details=[]
-
     current_date=check_in
     while current_date<check_out:
         tariff=room.get_tariff()
-        if current_date.weekday()==4 or current_date.weekday()==5:
+        if current_date.weekday()==4 or current_date.weekday()== 5:
             tariff=tariff+(tariff*20/100)
         extra_guest=room.guest_charges(no_of_guests)
-        breakfast_charge=room.cost_breakfast(no_of_guests,breakfast)
+        breakfast_charge=room.cost_breakfast(no_of_guests, breakfast)
         room_amount+=tariff
         guest_amount+=extra_guest
         breakfast_amount+=breakfast_charge
@@ -35,8 +33,8 @@ def calculate_amount(room,no_of_guests,check_in,check_out,breakfast,stays):
     gst_amount=0
     for row in nights_details:
         night_total=(row["room_tariff"]+row["extra_guest"]+row["breakfast"])
-        if(room_amount+guest_amount+breakfast_amount)>0:
-            discount=(stay_discount+loyalty_discount)*night_total/(room_amount+guest_amount+breakfast_amount)
+        if (room_amount+guest_amount+breakfast_amount) > 0:
+            discount=((stay_discount+loyalty_discount)*night_total/(room_amount+guest_amount+breakfast_amount))
         else:
             discount=0
         remain_amount=night_total-discount
@@ -47,9 +45,9 @@ def calculate_amount(room,no_of_guests,check_in,check_out,breakfast,stays):
         gst_amount+=gst
     total_amount=total_before_gst+gst_amount
     return {
-        "nights": nights,
-        "room_amount": room_amount,
-        "guest_amount": guest_amount,
+        "nights":nights,
+        "room_amount":room_amount,
+        "guest_amount":guest_amount,
         "breakfast_amount": breakfast_amount,
         "stay_discount": stay_discount,
         "loyalty_discount": loyalty_discount,
@@ -57,4 +55,16 @@ def calculate_amount(room,no_of_guests,check_in,check_out,breakfast,stays):
         "total_amount": total_amount,
         "night_details": nights_details
     }
-    
+def calculate_refund(check_in):
+    today=date.today()
+    remaining_days=(check_in-today).days
+    if remaining_days>=7:
+        refund_perc=100
+    elif remaining_days>=2:
+        refund_perc=50
+    else:
+        refund_perc=0
+    return refund_perc
+def get_refund_amount(amount_paid,refund_perc):
+    refund_amount=amount_paid*refund_perc/100
+    return refund_amount
